@@ -1,45 +1,63 @@
-function computerPlay() {
-  const CHOICES = ["rock", "paper", "scissors"];
-  return Math.floor(Math.random() * CHOICES.length);
-}
-
 let gameResult = "",
   playerOutcome = "",
   roundResult = "",
   resultDescription = "",
   playerPoints = 0,
-  computerPoints = 0;
+  computerPoints = 0,
+  round = 0;
+
+const playBtns = document.querySelectorAll("button.play");
+const gameRound = document.querySelector("h2.game-round");
+gameRound.textContent = `ROUND: ${round}`;
+const computerMove = document.querySelector("li.computer-move");
+const playerMove = document.querySelector("li.player-move");
+const moveResult = document.querySelector("h3.move-result");
+const gameResults = document.querySelector("h3.game-results");
+const resetGameBtn = document.querySelector("button#reset-game-btn");
+resetGameBtn.setAttribute("style", "display: none");
+
+// Game Handling Methods
+function computerPlay() {
+  const CHOICES = ["rock", "paper", "scissors"];
+  return CHOICES[Math.floor(Math.random() * CHOICES.length)];
+}
+
+function playGame() {
+  gameResult =
+    playerPoints > computerPoints
+      ? `Player Wins! [${playerPoints} - ${computerPoints}]`
+      : `Computer Wins! [${playerPoints} - ${computerPoints}]`;
+
+  gameResults.textContent = gameResult;
+  return gameResult;
+}
+
+function resetGame() {}
 
 function playRound(playerSelection, computerSelection) {
   playerSelection = playerSelection.toLowerCase();
 
-  if (computerSelection == 0) {
+  if (computerSelection == "rock") {
     playerSelection == "paper"
       ? ((playerOutcome = "win"), (resultDescription = "Paper WRAPS Rock"))
       : playerSelection == "scissors"
       ? ((playerOutcome = "loss"),
         (resultDescription = "Rock CRUSHES Scissors"))
-      : playerSelection == "rock"
-      ? (playerOutcome = "draw")
-      : (playerOutcome = "invalid");
+      : (playerOutcome = "draw");
   }
-  if (computerSelection == 1) {
+  if (computerSelection == "paper") {
     playerSelection == "rock"
       ? ((playerOutcome = "loss"), (resultDescription = "Paper WRAPS Rock"))
       : playerSelection == "scissors"
       ? ((playerOutcome = "win"), (resultDescription = "Scissors CUTS Paper"))
-      : playerSelection == "paper"
-      ? (playerOutcome = "draw")
-      : (playerOutcome = "invalid");
+      : (playerOutcome = "draw");
   }
-  if (computerSelection == 2) {
+  if (computerSelection == "scissors") {
     playerSelection == "rock"
       ? ((playerOutcome = "win"), (resultDescription = "Rock CRUSHES Scissors"))
       : playerSelection == "paper"
       ? ((playerOutcome = "loss"), (resultDescription = "Scissors CUTS Paper"))
-      : playerSelection == "scissors"
-      ? (playerOutcome = "draw")
-      : (playerOutcome = "invalid");
+      : (playerOutcome = "draw");
   }
 
   switch (playerOutcome) {
@@ -54,31 +72,32 @@ function playRound(playerSelection, computerSelection) {
       roundResult = `You LOOSE: ${resultDescription}`;
       computerPoints++;
       break;
-
-    case "invalid":
-      roundResult = `Your input was INVALID : Please select a valid choice!`;
-      break;
   }
 
   return roundResult;
 }
 
-function playGame() {
-  for (let round = 0; round < 5; round++) {
+// event listeners for game objects (buttons)
+resetGameBtn.addEventListener("click", resetGame());
+
+playBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
     let computerSelection = computerPlay();
-    let playerSelection = prompt("Enter your choice: ", "");
+    computerMove.textContent = "CPU Move: " + computerSelection.toString();
+    let playerSelection = btn.textContent.toLowerCase();
+    playerMove.textContent = "Your Move: " + playerSelection.toString();
+    playRound(playerSelection, computerSelection);
+    moveResult.textContent = roundResult;
 
-    console.log(playRound(playerSelection, computerSelection));
-    if (playerOutcome == "invalid" || playerOutcome == "draw") {
-      --round;
+    if (playerOutcome != "draw") {
+      ++round;
     }
-  }
 
-  gameResult =
-    playerPoints > computerPoints
-      ? `Player Wins! [${playerPoints} - ${computerPoints}]`
-      : `Computer Wins! [${playerPoints} - ${computerPoints}]`;
-  return gameResult;
-}
+    gameRound.textContent = `ROUND: ${round}`;
 
-console.log(playGame());
+    if (playerPoints + computerPoints == 5) {
+      playGame();
+      resetGameBtn.setAttribute("style", "display: inline-block");
+    }
+  });
+});
